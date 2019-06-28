@@ -60,7 +60,7 @@ public class BigMap<K extends Serializable, V extends Serializable> implements B
 				throw new RuntimeException(ex);
 			}
 		}
-		values = new BigList<>(path.resolve("values"));
+		values = BigList.<V>open(path.resolve("values"));
 	}
 
 	public void put(K key, V value) {

@@ -1,6 +1,5 @@
 package altaite.collection.types;
 
-import altaite.BigCollectionResource;
 import altaite.io.FileOperation;
 import altaite.kryo.KryoReader;
 import altaite.kryo.KryoReaderPositional;
@@ -26,7 +25,7 @@ import java.util.NoSuchElementException;
 // TODO delete files in clearFiles one by one
 // TEST by damaging files randomly
 // TODO autoclosable version, close writer after each
-public class BigList<T extends Serializable> implements BigCollection<T>, Serializable, Collection<T> {
+public class BigList<T extends Serializable> implements BigCollection<T> {
 // TODO simple transaction, store both posititions and entries separatelly
 
 	private transient Path path;
@@ -38,11 +37,28 @@ public class BigList<T extends Serializable> implements BigCollection<T>, Serial
 	private KryoReaderPositional<T> dataReader;
 	private List<Long> pointers; // including the one yet unused, the total file size (always including 0L as first, but this is not serialized)
 
-	public BigList(Path dir) {
+	private BigList(Path dir) {
 		initializePaths(dir);
 		repairFiles();
 		initializePointers();
 		assert pointers.get(0) == 0;
+	}
+
+	public static <T extends Serializable> BigList<T> open(Path dir) {
+		BigList<T> l = new BigList<>(dir);
+		return l;
+	}
+
+	public static <T extends Serializable> BigList<T> clearAndOpen(Path dir) {
+		BigList<T> l = new BigList<>(dir);
+		l.closeAndClear();
+		l = new BigList<>(dir);
+		return l;
+	}
+
+	private void closeAndClear() {
+		close();
+		deleteFiles();
 	}
 
 	private void initializePointers() {
@@ -145,9 +161,13 @@ public class BigList<T extends Serializable> implements BigCollection<T>, Serial
 		closeReader();
 		closeWriter();
 		try {
+			System.out.println("deletions started");
 			FileOperation.checkedDelete(dataFile);
+			System.out.println("data file deleted");
 			FileOperation.checkedDelete(pointerFile);
+			System.out.println("pointer file deleted");
 			pointerWritingFlag.deleteFile();
+			System.out.println("flag file deleted");
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
@@ -168,7 +188,6 @@ public class BigList<T extends Serializable> implements BigCollection<T>, Serial
 	/**
 	 * Opens writer that should be closed later by closeWriter().
 	 */
-	@Override
 	public boolean add(T t) {
 		assert pointers.get(0) == 0;
 		lazyOpenForWriting();
@@ -221,13 +240,13 @@ public class BigList<T extends Serializable> implements BigCollection<T>, Serial
 		}
 		System.out.println();
 	}
-	
+
 	private void lazyOpenForWriting() {
 		if (dataReader != null) {
 			throw new RuntimeException("Cannot add after reading was initiated.");
 		}
 		if (dataWriter == null) {
-			dataWriter = new KryoWriter(dataFile);
+			dataWriter = new KryoWriter(dataFile, true);
 		}
 		if (pointerWriter == null) {
 			try {
@@ -238,7 +257,6 @@ public class BigList<T extends Serializable> implements BigCollection<T>, Serial
 			}
 		}
 	}
-
 
 	public void close() {
 		closeWriter();
@@ -263,17 +281,14 @@ public class BigList<T extends Serializable> implements BigCollection<T>, Serial
 		}
 	}
 
-	@Override
 	public int size() {
 		return pointers.size() - 1;
 	}
 
-	@Override
 	public boolean isEmpty() {
 		return pointers.size() == 0;
 	}
 
-	@Override
 	public boolean addAll(Collection<? extends T> collection) {
 		for (T t : collection) {
 			add(t);
@@ -323,45 +338,32 @@ public class BigList<T extends Serializable> implements BigCollection<T>, Serial
 		return sb.toString();
 	}
 
-	@Override
 	public boolean contains(Object o) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public Object[] toArray() {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public <T> T[] toArray(T[] ts) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public boolean remove(Object o) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public boolean containsAll(Collection<?> clctn) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public boolean removeAll(Collection<?> collection) {
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
 	public boolean retainAll(Collection<?> clctn) {
 		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void clear() {
-		close();
-		deleteFiles();
 	}
 
 	protected File getDataFile() {
@@ -378,7 +380,7 @@ class InstanceIterator<T> implements Iterator<T> {
 
 	private KryoReader<T> reader;
 
-	 public InstanceIterator(File file) {
+	public InstanceIterator(File file) {
 		reader = new KryoReader<>(file);
 	}
 

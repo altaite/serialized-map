@@ -3,12 +3,9 @@ package altaite.collection.types;
 import altaite.BigCollectionResource;
 import altaite.collection.dummy.Dummy;
 import altaite.collection.dummy.DummyFactory;
-import altaite.io.FileOperation;
-import java.io.File;
-import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
-import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
 public class BigListTest {
@@ -18,27 +15,27 @@ public class BigListTest {
 	private final int size = 100;
 	private final int elementSize = 100;
 
-	private void clean() {
+	/*private void clean() {
 		try {
 			FileUtils.deleteDirectory(BigCollectionResource.getBigListTestPath().toFile());
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}
-	}
+	}*/
 
-	private void createBigList() {
+ /*private void createBigList() {
 		clean();
 		List<Dummy> list = DummyFactory.createList(size, elementSize);
 		BigList<Dummy> bigList = new BigList<>(BigCollectionResource.getBigListTestPath());
 		bigList.addAll(list);
 		bigList.closeWriter();
-	}
-
-	@Test
+	}*/
+	/*@Test
 	public void testGet() {
-		clean();
+		//clean();
 		List<Dummy> list = DummyFactory.createList(size, elementSize);
-		BigList<Dummy> bigList = new BigList<>(BigCollectionResource.getBigListTestPath());
+		Path dir = BigCollectionResource.getBigListTestPath();
+		BigList<Dummy> bigList = BigList.<Dummy>clearAndOpen(dir);
 		for (Dummy dummy : list) {
 			bigList.add(dummy);
 		}
@@ -51,14 +48,13 @@ public class BigListTest {
 			assert x.equals(o) : i + " " + x.getId() + " != " + o.getId();
 		}
 		bigList.closeReader();
-	}
+	}*/
 
-	@Test
+	/*@Test
 	public void testIterator() {
-		clean();
 		System.out.println(BigCollectionResource.getBigListTestPath().toFile());
 		List<Dummy> list = DummyFactory.createList(size, elementSize);
-		BigList<Dummy> bigList = new BigList<>(BigCollectionResource.getBigListTestPath());
+		BigList<Dummy> bigList = BigList.<Dummy>clearAndOpen(BigCollectionResource.getBigListTestPath());
 		for (Dummy dummy : list) {
 			bigList.add(dummy);
 		}
@@ -70,15 +66,12 @@ public class BigListTest {
 			}
 		}
 		// iterator closes reader automatically
-	}
-	 
+	}*/
+
 	@Test
 	public void testLoading() {
-		clean();
-
-		BigList<Integer> a = new BigList<>(BigCollectionResource.getBigListTestPath());
-		a.clear();
-		a = new BigList<>(BigCollectionResource.getBigListTestPath());
+		Path dir = BigCollectionResource.getBigListTestPath();
+		BigList<Integer> a = BigList.<Integer>clearAndOpen(dir);
 
 		a.add(0);
 		a.add(1);
@@ -93,18 +86,16 @@ public class BigListTest {
 		assert a.get(1) == 1;
 		assert a.get(2) == 2;
 		a.closeReader();
-		a = new BigList<>(BigCollectionResource.getBigListTestPath());
-
-		//a.add(3);
+		a = BigList.<Integer>open(dir);
+		a.add(3); // this without clear will cause error
 		assert a.get(0) == 0;
 		assert a.get(1) == 1;
 		assert a.get(2) == 2;
 		a.closeWriter();
 		a.closeReader();
-		clean();
 	}
 
-	@Test
+	/*	@Test
 	public void testCorruption() {
 		clean();
 		BigList<Integer> a = new BigList<>(BigCollectionResource.getBigListTestPath());
@@ -130,5 +121,5 @@ public class BigListTest {
 		// load it from hdd
 
 		clean();
-	}
+	}*/
 }

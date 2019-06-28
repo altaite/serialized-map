@@ -3,6 +3,7 @@ package altaite.collection.types;
 import altaite.BigCollectionResource;
 import altaite.io.FileOperation;
 import java.io.File;
+import java.nio.file.Path;
 
 public class BigListTestTemp {
 
@@ -16,9 +17,8 @@ public class BigListTestTemp {
 	}
 
 	private BigList<Integer> createClear() {
-		BigList<Integer> a = new BigList<>(BigCollectionResource.getBigListTestPath());
-		a.clear();
-		a = new BigList<>(BigCollectionResource.getBigListTestPath());
+		Path dir = BigCollectionResource.getBigListTestPath();
+		BigList<Integer> a = BigList.<Integer>clearAndOpen(dir);
 		return a;
 	}
 
@@ -33,16 +33,13 @@ public class BigListTestTemp {
 		FileOperation.truncate(file, Math.round(file.length() * percentage));
 	}
 
-	public static void main(String[] args) throws Exception {
+	/*public static void main(String[] args) throws Exception {
 		BigListTestTemp m = new BigListTestTemp();
 		m.testCorruption();
-	}
-
-	/*public static void main(String[] args) throws Exception {
-		BigList<Integer> a = new BigList<>(BigCollectionResource.getBigListTestPath());
-		a.clear();
-		a = new BigList<>(BigCollectionResource.getBigListTestPath());
-
+	}*/
+	public static void main(String[] args) throws Exception {
+		Path dir = BigCollectionResource.getBigListTestPath();
+		BigList<Integer> a = BigList.<Integer>clearAndOpen(dir);
 		a.add(0);
 		a.add(1);
 		a.add(2);
@@ -53,20 +50,27 @@ public class BigListTestTemp {
 		System.out.println(a.get(1) + " ***");
 		System.out.println(a.get(2) + " ***");
 		assert a.get(0) == 0 : a.get(0);
-		assert a.get(1) == 1 : a.get(1);
-		assert a.get(2) == 2 : a.get(2);
+		assert a.get(1) == 1;
+		assert a.get(2) == 2;
 		a.closeReader();
 
-		//clean(BigCollectionResource.getBigListTestPath());
-		a = new BigList<>(BigCollectionResource.getBigListTestPath());
-		a.clear();
-		a = new BigList<>(BigCollectionResource.getBigListTestPath());
-		a.add(3);
-		//assert a.get(0) == 0;
-		//assert a.get(1) == 1;
-		//assert a.get(2) == 2;
-		a.closeWriter();
-		a.closeReader();
-		a.clear();
-	}*/
+		//BigList<Integer> b = BigList.<Integer>open(dir);
+		BigList<Integer> b = BigList.<Integer>open(dir);
+		b.closeWriter();
+		assert b.size() == 3;
+		assert b.get(0) == 0;
+		assert b.get(1) == 1;
+		assert b.get(2) == 2;
+		b.closeReader();
+
+		BigList<Integer> c = BigList.<Integer>open(dir);
+		c.add(3); // this without clear will cause error
+		c.closeWriter();
+		// TODO split BigListWriter, BigListReader
+		assert c.get(0) == 0 : c.get(0); // initialize pointer end? seek datawriter towards end?
+		assert c.get(1) == 1;
+		assert c.get(2) == 2;
+		assert c.get(3) == 3;
+		b.closeReader();
+	}
 }
