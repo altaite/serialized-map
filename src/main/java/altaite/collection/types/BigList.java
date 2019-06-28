@@ -157,17 +157,12 @@ public class BigList<T extends Serializable> implements BigCollection<T> {
 
 	/// TODO delte all the files
 	private void deleteFiles() {
-		String msg = " not deleted.";
 		closeReader();
 		closeWriter();
 		try {
-			System.out.println("deletions started");
 			FileOperation.checkedDelete(dataFile);
-			System.out.println("data file deleted");
 			FileOperation.checkedDelete(pointerFile);
-			System.out.println("pointer file deleted");
 			pointerWritingFlag.deleteFile();
-			System.out.println("flag file deleted");
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}

@@ -34,7 +34,6 @@ public class BigResource {
 	}
 
 	public void delete() {
-		String msg = " not deleted.";
 		try {
 			FileOperation.checkedDelete(dataFile);
 			FileOperation.checkedDelete(pointerFile);
@@ -42,10 +41,6 @@ public class BigResource {
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
-	}
-
-	public void fix() {
-
 	}
 
 	public File getDataFile() {

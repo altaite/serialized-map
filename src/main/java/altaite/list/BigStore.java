@@ -14,7 +14,6 @@ public class BigStore {
 
 	public BigStore(BigResource resource) {
 		this.resources = resource;
-
 		repairFiles();
 		initializePointers();
 		assert pointers.get(0) == 0;
@@ -91,7 +90,7 @@ public class BigStore {
 	}
 
 	private void fixData() {
-		if (pointers.isEmpty()) {
+		/*if (pointers.isEmpty()) {
 			resources.delete();;
 		} else {
 			long length = pointers.get(pointers.size() - 1);
@@ -100,8 +99,24 @@ public class BigStore {
 				throw new RuntimeException();
 			}
 			FileOperation.truncate(resources.getDataFile(), length);
-		}
+		}*/
 	}
+	
+	private boolean fixDataFromList() {
+		return true;
+		/*long dataFileLength = dataFile.length();
+		if (dataFileLength == 0) {
+			return false;
+		} else if (pointers.size() == 0) {
+			return true;
+		}
+		long shouldBe = pointers.get(pointers.size() - 1);
+		if (dataFileLength < shouldBe) {
+			throw new RuntimeException();
+		}
+		return dataFileLength != shouldBe;*/
+	}
+
 
 	public long getPointer(int index) {
 		return pointers.get(index);
@@ -112,6 +127,6 @@ public class BigStore {
 	}
 
 	public boolean isEmpty() {
-		return pointers.size() == 0;
+		return pointers.size() <= 1;
 	}
 }
