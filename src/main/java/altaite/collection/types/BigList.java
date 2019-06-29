@@ -180,28 +180,28 @@ public class BigList<T extends Serializable> implements BigCollection<T> {
 		}
 	}
 
-	/**
-	 * Opens writer that should be closed later by closeWriter().
-	 */
-	public boolean add(T t) {
-		assert pointers.get(0) == 0;
-		lazyOpenForWriting();
-		long position = dataWriter.write(t);
-		addPosition(position);
-		assert pointers.get(0) == 0;
-		return true;
-	}
-
-	private void addPosition(long position) {
-		pointers.add(position);
-		try {
-			pointerWritingFlag.on();// if flag is missing, last long will be considered corrupted
-			pointerWriter.writeLong(position);
-			pointerWritingFlag.off();
-		} catch (IOException ex) {
-			throw new RuntimeException(ex);
+		/**
+		 * Opens writer that should be closed later by closeWriter().
+		 */
+		public boolean add(T t) {
+			assert pointers.get(0) == 0;
+			lazyOpenForWriting();
+			long position = dataWriter.write(t);
+			addPosition(position);
+			assert pointers.get(0) == 0;
+			return true;
 		}
-	}
+
+		private void addPosition(long position) {
+			pointers.add(position);
+			try {
+				pointerWritingFlag.on();// if flag is missing, last long will be considered corrupted
+				pointerWriter.writeLong(position);
+				pointerWritingFlag.off();
+			} catch (IOException ex) {
+				throw new RuntimeException(ex);
+			}
+		}
 
 	/**
 	 * Opens reader that should be closed later by closeReader().

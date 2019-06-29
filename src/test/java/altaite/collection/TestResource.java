@@ -5,7 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class Resource {
+public class TestResource {
 
 	private static Path home = Paths.get("d:/t/data/serialized-map");
 

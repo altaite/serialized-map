@@ -1,6 +1,6 @@
 package altaite.collection.types;
 
-import altaite.collection.Resource;
+import altaite.collection.TestResource;
 import java.util.Random;
 import org.junit.Test;
 
@@ -9,7 +9,7 @@ public class ListOfListsTest {
 	private ListOfLists<Integer> list;
 
 	public ListOfListsTest() {
-		this.list = new ListOfLists(Resource.getTemporaryDir());
+		this.list = new ListOfLists(TestResource.getTemporaryDir());
 	}
 
 	@Test

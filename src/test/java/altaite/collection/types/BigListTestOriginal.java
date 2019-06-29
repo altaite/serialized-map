@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Random;
 import org.junit.Test;
 
-public class BigListTest {
+public class BigListTestOriginal {
 
 	//private List<Dummy> list;
 	//private BigList<Dummy> bigList;

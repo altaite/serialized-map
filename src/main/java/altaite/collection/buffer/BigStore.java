@@ -1,19 +1,26 @@
-package altaite.list;
+package altaite.collection.buffer;
 
 import altaite.io.FileOperation;
+import altaite.util.Flag;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BigStore {
+/**
+ * Common core of BigIn and BigOut. 
+ */
+class BigStore {
 
 	private BigResource resources;
 	private List<Long> pointers;
+	private Flag flag;
 
 	public BigStore(BigResource resource) {
 		this.resources = resource;
+		resources.makeDirIfAbsent();
+		flag = new Flag(resources.getPointerWritingFlagFile());
 		repairFiles();
 		initializePointers();
 		assert pointers.get(0) == 0;
@@ -66,14 +73,14 @@ public class BigStore {
 		boolean wrongLength = length % 8 == 0;
 		/* 8 - file of long. Should happen only in case of file damage,
 		   unlike flag, which can be off simply because application was killed.*/
-		return wrongLength || resources.getPointerWritingFlag().isOn();
+		return wrongLength || flag.isOn();
 	}
 
 	private boolean dataCorrupt() {
 		long dataFileLength = resources.getDataFile().length();
 		if (dataFileLength == 0) {
 			return false;
-		} else if (pointers.size() == 0) {
+		} else if (pointers.isEmpty()) {
 			return true;
 		}
 		long shouldBe = pointers.get(pointers.size() - 1);
@@ -101,7 +108,7 @@ public class BigStore {
 			FileOperation.truncate(resources.getDataFile(), length);
 		}*/
 	}
-	
+
 	private boolean fixDataFromList() {
 		return true;
 		/*long dataFileLength = dataFile.length();
@@ -117,9 +124,12 @@ public class BigStore {
 		return dataFileLength != shouldBe;*/
 	}
 
-
 	public long getPointer(int index) {
 		return pointers.get(index);
+	}
+
+	public void addPointer(long position) {
+		pointers.add(position);
 	}
 
 	public int size() {
@@ -128,5 +138,17 @@ public class BigStore {
 
 	public boolean isEmpty() {
 		return pointers.size() <= 1;
+	}
+
+	public void setFlagOn() {
+		flag.on();
+	}
+
+	public void setFlagOff() {
+		flag.off();
+	}
+
+	public void close() {
+		flag.close();
 	}
 }
