@@ -1,18 +1,34 @@
 package altaite.collection.buffer;
 
 import altaite.kryo.KryoReader;
+import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
  * Closes itself after hasNext() returns false, or next() results in NoSuchElementException().
+ *
+ * @param <T>
  */
-public class BigIterator<T> implements java.util.Iterator<T> {
+public class BigIterable<T> implements Iterable<T> {
 
-	private KryoReader<T> reader;
 	private BigResource resource;
 
-	public BigIterator(BigResource resource) {
+	public BigIterable(BigResource resource) {
 		this.resource = resource;
+
+	}
+
+	@Override
+	public Iterator<T> iterator() {
+		return new BigIterator<T>(resource);
+	}
+}
+
+class BigIterator<T> implements java.util.Iterator<T> {
+
+	private KryoReader<T> reader;
+
+	public BigIterator(BigResource resource) {
 		reader = new KryoReader<>(resource.getDataFile());
 	}
 

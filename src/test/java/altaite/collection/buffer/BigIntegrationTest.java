@@ -83,11 +83,4 @@ public class BigIntegrationTest {
 		}
 	}
 
-	private void write() {
-		clean();
-		List<Dummy> list = DummyFactory.createList(size, elementSize);
-		BigOut<Dummy> out = new BigOut<>(resource);
-		out.addAll(list);
-		out.close();
-	}
 }
