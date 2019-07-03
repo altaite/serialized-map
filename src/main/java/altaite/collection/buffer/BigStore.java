@@ -2,14 +2,17 @@ package altaite.collection.buffer;
 
 import altaite.io.FileOperation;
 import altaite.util.Flag;
+import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Common core of BigIn and BigOut. 
+ * Common core of BigIn and BigOut.
  */
 class BigStore {
 
@@ -21,8 +24,29 @@ class BigStore {
 		this.resources = resource;
 		resources.makeDirIfAbsent();
 		flag = new Flag(resources.getPointerWritingFlagFile());
-		repairFiles();
+
+		if (pointersUnfinished()) {
+			trimPointers();
+		}
 		initializePointers();
+		if (flag.isOn()) {
+			if (pointers.size() > 0) {
+				pointers.remove(pointers.size() - 1);
+			}
+			recreatePointers();
+		}
+		initializePointers();
+		if (pointers.isEmpty()) {
+			FileOperation.truncate(resources.getPointerFile(), 0);
+			FileOperation.truncate(resources.getDataFile(), 0);
+		} else {
+			resolveEndDifferences();
+		}
+		flag.off();
+		initializePointers();
+
+		assert getLastPointer() == resources.getDataFile().length() :
+			getLastPointer() + " == " + resources.getDataFile().length();
 		assert pointers.get(0) == 0;
 	}
 
@@ -31,16 +55,11 @@ class BigStore {
 	}
 
 	private void initializePointers() {
-		createPositionsInMemory();
+		pointers = new ArrayList<>();
+		pointers.add(0L); // beware, not in file
 		if (resources.getPointerFile().exists() && resources.getPointerFile().length() > 0) {
 			loadPointers();
-			//printPositions();
 		}
-	}
-
-	private void createPositionsInMemory() {
-		pointers = new ArrayList<>();
-		pointers.add(0L);
 	}
 
 	private void loadPointers() {
@@ -54,40 +73,10 @@ class BigStore {
 		}
 	}
 
-	private void repairFiles() {
-		if (pointersCorrupt()) {
-			trimPointers();
-			initializePointers();
-		}
-		if (dataCorrupt()) {
-			fixData();
-		}
-		// positions including current file size
-		// flag for positions
-		// adjust positions first	
-		// then cut data using last length
-	}
-
-	private boolean pointersCorrupt() {
+	private boolean pointersUnfinished() {
 		long length = resources.getPointerFile().length();
-		boolean wrongLength = length % 8 == 0;
-		/* 8 - file of long. Should happen only in case of file damage,
-		   unlike flag, which can be off simply because application was killed.*/
-		return wrongLength || flag.isOn();
-	}
-
-	private boolean dataCorrupt() {
-		long dataFileLength = resources.getDataFile().length();
-		if (dataFileLength == 0) {
-			return false;
-		} else if (pointers.isEmpty()) {
-			return true;
-		}
-		long shouldBe = pointers.get(pointers.size() - 1);
-		if (dataFileLength < shouldBe) {
-			throw new RuntimeException();
-		}
-		return dataFileLength != shouldBe;
+		boolean wrongLength = length % 8 != 0; // 8 - file of long.
+		return wrongLength;
 	}
 
 	private void trimPointers() {
@@ -96,32 +85,47 @@ class BigStore {
 		FileOperation.truncate(resources.getPointerFile(), newLength);
 	}
 
-	private void fixData() {
-		/*if (pointers.isEmpty()) {
-			resources.delete();;
-		} else {
-			long length = pointers.get(pointers.size() - 1);
-			long current = resources.getDataFile().length();
-			if (length < current) {
-				throw new RuntimeException();
-			}
-			FileOperation.truncate(resources.getDataFile(), length);
-		}*/
+	private void printPointers() {
+		for (int i = 0; i < pointers.size(); i++) {
+			System.out.print(pointers.get(i) + " ");
+		}
+		System.out.println("");
 	}
 
-	private boolean fixDataFromList() {
-		return true;
-		/*long dataFileLength = dataFile.length();
-		if (dataFileLength == 0) {
-			return false;
-		} else if (pointers.size() == 0) {
-			return true;
+	private void resolveEndDifferences() {
+		printPointers();
+		long reported = pointers.get(pointers.size() - 1);
+		long actual = resources.getDataFile().length();
+		if (reported < actual) {
+			FileOperation.truncate(resources.getDataFile(), reported);
+		} else if (actual < reported) {
+			int i = pointers.size() - 1;
+			while (i > 0 && actual < pointers.get(i)) {
+				i--;
+			}
+			FileOperation.truncate(resources.getDataFile(), pointers.get(i));
+			shortenPointers(i + 1);
+			recreatePointers();
 		}
-		long shouldBe = pointers.get(pointers.size() - 1);
-		if (dataFileLength < shouldBe) {
-			throw new RuntimeException();
+	}
+
+	private void shortenPointers(int removeFrom) {
+		for (int k = pointers.size() - 1; k >= removeFrom; k--) {
+			pointers.remove(k);
 		}
-		return dataFileLength != shouldBe;*/
+	}
+
+	private void recreatePointers() {
+		try (DataOutputStream pointerWriter = new DataOutputStream(
+			new BufferedOutputStream(
+				new FileOutputStream(resources.getPointerFile())))) {
+			for (int i = 1; i < pointers.size(); i++) { // 0 as first pointer is never written into file
+				long p = pointers.get(i);
+				pointerWriter.writeLong(p);
+			}
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
 	}
 
 	public long getPointer(int index) {
@@ -134,6 +138,10 @@ class BigStore {
 
 	public int size() {
 		return pointers.size() - 1;
+	}
+
+	public long getLastPointer() {
+		return pointers.get(pointers.size() - 1);
 	}
 
 	public boolean isEmpty() {

@@ -186,7 +186,7 @@ public class BigList<T extends Serializable> implements BigCollection<T> {
 		public boolean add(T t) {
 			assert pointers.get(0) == 0;
 			lazyOpenForWriting();
-			long position = dataWriter.write(t);
+			long position = dataWriter.write(t); // WRONG
 			addPosition(position);
 			assert pointers.get(0) == 0;
 			return true;

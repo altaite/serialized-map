@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import org.apache.commons.io.FileUtils;
+import org.junit.Test;
 
 public class BigIterableTest {
 
@@ -19,6 +20,7 @@ public class BigIterableTest {
 		clean();
 	}
 
+	@Test
 	public void testIterator() {
 		resource.clear();
 

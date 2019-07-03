@@ -38,10 +38,11 @@ public class KryoWriter<T> {
 	 * Returns file size after write.
 	 */
 	public long write(T t) {
+		long a = output.total();
 		kryo.writeClass(output, t.getClass());
 		kryo.writeObject(output, t);
-		long position = output.total();
-		return position;
+		long b = output.total();
+		return b - a;
 	}
 
 	public void close() {

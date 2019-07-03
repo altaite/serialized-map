@@ -24,8 +24,12 @@ public class BigOut<T> {
 	 * @param t To be added at the end.
 	 */
 	public void add(T t) {
-		long position = dataWriter.write(t);
+		long written = dataWriter.write(t);
+		//dataWriter.flush(); // TEMPTORARY FOR ASSERT
+		long position = store.getLastPointer() + written;
 		addPosition(position);
+		//assert position == store.getResources().getDataFile().length() :
+		//	position + " <> " + store.getResources().getDataFile().length();
 	}
 
 	public void addAll(Iterable<T> ts) {
