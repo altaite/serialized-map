@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Common core of BigIn and BigOut.
  */
-class BigStore {
+public class BigStore {
 
 	private BigResource resources;
 	private List<Long> pointers;
@@ -48,6 +48,11 @@ class BigStore {
 		assert getLastPointer() == resources.getDataFile().length() :
 			getLastPointer() + " == " + resources.getDataFile().length();
 		assert pointers.get(0) == 0;
+	}
+
+	public void truncate(int size) {
+		shortenPointers(size + 1);
+		FileOperation.truncate(resources.getDataFile(), getLastPointer());
 	}
 
 	public BigResource getResources() {
@@ -93,7 +98,6 @@ class BigStore {
 	}
 
 	private void resolveEndDifferences() {
-		printPointers();
 		long reported = pointers.get(pointers.size() - 1);
 		long actual = resources.getDataFile().length();
 		if (reported < actual) {
@@ -105,7 +109,7 @@ class BigStore {
 			}
 			FileOperation.truncate(resources.getDataFile(), pointers.get(i));
 			shortenPointers(i + 1);
-			recreatePointers();
+
 		}
 	}
 
@@ -113,6 +117,7 @@ class BigStore {
 		for (int k = pointers.size() - 1; k >= removeFrom; k--) {
 			pointers.remove(k);
 		}
+		recreatePointers();
 	}
 
 	private void recreatePointers() {
@@ -140,6 +145,10 @@ class BigStore {
 		return pointers.size() - 1;
 	}
 
+	/**
+	 *
+	 * @return Yet unwritten position in a data file, its length according to pointers in memory.
+	 */
 	public long getLastPointer() {
 		return pointers.get(pointers.size() - 1);
 	}

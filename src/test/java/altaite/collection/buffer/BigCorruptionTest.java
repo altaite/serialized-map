@@ -14,6 +14,7 @@ import org.junit.Test;
 
 public class BigCorruptionTest {
 
+	private Random random = new Random(1);
 	private Path dir = TestResource.getTemporaryDir();
 	private BigResource resource = new BigResource(dir);
 
@@ -26,8 +27,35 @@ public class BigCorruptionTest {
 	}
 
 	@Test
-	public void testCorruption() {
+	public void test() {
+		//dataCorruption();
+		//pointerCorruption();
+		for (int i = 0; i < 1; i++) {
+			combinedCorruption();
+		}
+	}
+
+	public void dataCorruption() {
 		create();
+		corruptData();
+		assert resource.getDataFile().exists();
+		assert resource.getPointerFile().exists();
+		testGet();
+		testIterator();
+	}
+
+	public void pointerCorruption() {
+		create();
+		corruptPointers();
+		assert resource.getDataFile().exists();
+		assert resource.getPointerFile().exists();
+		testGet();
+		testIterator();
+	}
+
+	public void combinedCorruption() {
+		create();
+		corruptPointers();
 		corruptData();
 		assert resource.getDataFile().exists();
 		assert resource.getPointerFile().exists();
@@ -47,8 +75,6 @@ public class BigCorruptionTest {
 
 	private void testGet() {
 		BigIn<Dummy> in = new BigIn<>(resource);
-		System.out.println("Fixed to length " + in.size() + " from " + list.size());
-
 		for (int i = 0; i < in.size(); i++) {
 			Dummy x = in.get(i);
 			Dummy o = list.get(i);
@@ -67,7 +93,6 @@ public class BigCorruptionTest {
 		out.close();
 
 		BigIn<Dummy> in = new BigIn<>(resource);
-		Random random = new Random(1);
 		for (int i = 0; i < size; i++) {
 			int r = random.nextInt(list.size());
 			Dummy x = in.get(r);
@@ -78,15 +103,19 @@ public class BigCorruptionTest {
 	}
 
 	private void corruptData() {
-		Random random = new Random(1);
-
 		File data = resource.getDataFile();
-
 		long dataLength = data.length();
 		double corruptedEndPercent = 0.3;
 		long truncatedDataLength = Math.round((1 - random.nextDouble() * corruptedEndPercent) * dataLength);
-
 		FileOperation.truncate(data, truncatedDataLength);
+	}
+
+	private void corruptPointers() {
+		File file = resource.getPointerFile();
+		long dataLength = file.length();
+		double corruptedEndPercent = 0.3;
+		long truncatedDataLength = Math.round((1 - random.nextDouble() * corruptedEndPercent) * dataLength);
+		FileOperation.truncate(file, truncatedDataLength);
 	}
 
 	private void clean() {
