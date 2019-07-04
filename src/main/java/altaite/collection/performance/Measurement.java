@@ -1,6 +1,5 @@
 package altaite.collection.performance;
 
-import altaite.collection.types.BigList;
 import java.util.Random;
 
 public class Measurement {
@@ -36,7 +35,7 @@ public class Measurement {
 		System.out.println("read ite " + Timer.get());*/
 	}
 
-	private void write(BigList storage) {
+	/*private void write(BigList storage) {
 		initialize();
 		for (int i = 0; i < numberOfItems; i++) {
 			int[] item = next();
@@ -52,7 +51,7 @@ public class Measurement {
 			storage.get(i);
 		}
 		storage.closeReader();
-	}
+	}*/
 
 	/*private void write(BigIterable<int[]> storage) {
 		initialize();

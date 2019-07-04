@@ -1,5 +1,6 @@
-package altaite.util;
+package altaite.collection.buffer;
 
+import altaite.collection.buffer.Flag;
 import java.io.File;
 import org.junit.Test;
 

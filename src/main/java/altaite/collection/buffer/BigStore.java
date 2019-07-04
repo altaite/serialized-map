@@ -1,7 +1,6 @@
 package altaite.collection.buffer;
 
 import altaite.io.FileOperation;
-import altaite.util.Flag;
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

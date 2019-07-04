@@ -1,4 +1,4 @@
-package altaite.util;
+package altaite.collection.buffer;
 
 import altaite.io.FileOperation;
 import java.io.File;
