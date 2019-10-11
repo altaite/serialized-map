@@ -14,7 +14,7 @@ import java.util.List;
  * Common core of BigIn and BigOut.
  */
 public class BigStore {
-
+    // TODO some kind of lock on files, first to open will block for others
 	private BigResource resources;
 	private List<Long> pointers;
 	private Flag flag;

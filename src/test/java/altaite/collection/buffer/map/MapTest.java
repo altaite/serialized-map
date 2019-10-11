@@ -19,12 +19,12 @@ public class MapTest {
 	}
 
 	@Test
-	public void test() {
-		basic();
-		corruption();
+	public void testBasic() {
+		testNormal();
+		testCorruption();
 	}
 
-	public void basic() {
+	public void testNormal() {
 		Map<String, String> map = createMap();
 
 		MapOut<String, String> out = new MapOut<>(dir);
@@ -49,7 +49,14 @@ public class MapTest {
 		in.close();
 	}
 
-	private void corruption() {
+	private void testCorruption() {
+		MapOut<String, String> out = new MapOut<>(dir);
+		out.TEST_ONLY_ADD_KEY("key");
+		out.close();
+
+		MapIn<String, String> in = new MapIn<>(dir);
+		assert in.size() == 0;
+		in.close();
 
 	}
 
@@ -69,4 +76,31 @@ public class MapTest {
 			throw new RuntimeException(ex);
 		}
 	}
+
+	@Test
+	public void testAppendFalse() {
+		testAppend(false, 1);
+	}
+
+	@Test
+	public void testAppendTrue() {
+		testAppend(true, 2);
+	}
+
+	private void testAppend(boolean append, int size) {
+		MapOut<String, String> out;
+
+		out = new MapOut<>(dir);
+		out.put("a", "aa");
+		out.close();
+
+		out = new MapOut<>(dir, append);
+		out.put("bb", "bbb");
+		out.close();
+
+		MapIn<String, String> in = new MapIn<>(dir);
+		assert in.size() == size;
+		in.close();
+	}
+
 }

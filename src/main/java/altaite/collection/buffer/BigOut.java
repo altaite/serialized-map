@@ -7,6 +7,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+/**
+ * Serializes a series of objects.
+ */
 public class BigOut<T> {
 
 	private BigStore store;

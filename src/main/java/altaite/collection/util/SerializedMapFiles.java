@@ -30,6 +30,8 @@ import java.util.Set;
  * @param <K> Key type. Must implement Serializable.
  * @param <V> Value type. Must provide empty public constructor (for Kryo).
  */
+// probably deprecated
+@Deprecated
 public class SerializedMapFiles<K extends Serializable, V extends Serializable>
 	implements Serializable, Iterable<V> {
 

@@ -29,8 +29,19 @@ public class MapOut<K, V> {
 		values.add(value);
 	}
 
+	/**
+	 * seems to be necessary, i.e. does the original idea of fixing corruption any value at all? closing and opening all the time? flush?
+	 */
 	public void close() {
 		keys.close();
 		values.close();
+	}
+
+	protected void TEST_ONLY_ADD_KEY(K key) {
+		keys.add(key);
+	}
+
+	protected void TEST_ONLY_ADD_VALUE(V value) {
+		values.add(value);
 	}
 }

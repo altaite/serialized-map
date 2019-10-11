@@ -1,5 +1,6 @@
 package altaite.collection;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,5 +20,13 @@ public class TestResource {
 			}
 		}
 		return temp;
+	}
+
+	public static Path getTemporaryPath(String filename) {
+		return getTemporaryDir().resolve(filename);
+	}
+
+	public static File getTemporaryFile(String filename) {
+		return getTemporaryDir().resolve(filename).toFile();
 	}
 }

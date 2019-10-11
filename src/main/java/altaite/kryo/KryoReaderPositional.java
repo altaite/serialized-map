@@ -18,7 +18,6 @@ public class KryoReaderPositional<T> {
 
 	private Kryo kryo;
 	private RandomAccessFile raf;
-
 	private File file;
 
 	public KryoReaderPositional(File file) {
@@ -70,7 +69,9 @@ public class KryoReaderPositional<T> {
 	}*/
 	public void close() {
 		try {
-			raf.close();
+			if (raf != null) {
+				raf.close();
+			}
 		} catch (IOException ex) {
 			throw new RuntimeException(ex);
 		}

@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+// probably deprecated
+@Deprecated
 public class ListOfLists<T> {
 
 	private InMemory buffer = new InMemory(10000);

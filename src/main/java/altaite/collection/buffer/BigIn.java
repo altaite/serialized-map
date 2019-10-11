@@ -4,6 +4,9 @@ import altaite.kryo.KryoReaderPositional;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Deserializes a series of objects.
+ */
 public class BigIn<T> {
 
 	private BigStore store;
@@ -34,7 +37,7 @@ public class BigIn<T> {
 		}
 		return list;
 	}
-	
+
 	public void close() {
 		dataReader.close();
 		store.close();
